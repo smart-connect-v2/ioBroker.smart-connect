@@ -29,9 +29,7 @@ class SmartConnect extends utils.Adapter {
     };
 
     private async _getDevices(): Promise<Device[]> {
-        const objects = Object.values(
-            await this.getForeignObjectsAsync(/*this.rootPath ? `${this.rootPath}.*` : */ '*'),
-        );
+        const objects = Object.values(await this.getForeignObjectsAsync(this.rootPath ? `*` : '*', 'channel'));
 
         return objects
             .filter(({ type, common: { role } }) => type === 'channel' && role && isSupportedDeviceType(role))

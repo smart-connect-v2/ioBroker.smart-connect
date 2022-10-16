@@ -39,6 +39,10 @@ class Server {
     this.httpServer = null;
     this.users = users;
     this.sessionSecret = sessionSecret;
+    this.app.use((err, req, res, _next) => {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    });
     this.app.use((req, res, next) => {
       const origin = req.headers.origin;
       if (!origin || req.method !== "OPTIONS") {
@@ -79,10 +83,13 @@ class Server {
         serviceName: "Smart Connect ioBroker Backend"
       });
     });
-    this.app.post("/login", (req, res) => {
+    this.app.post("/login", (0, import_express_validator.body)("username").isString(), (0, import_express_validator.body)("password").isString(), (req, res) => {
       const { username, password } = req.body;
       let validUser = null;
       for (const user of this.users) {
+        if (user.username.length !== username.length || user.password.length !== password.length) {
+          continue;
+        }
         const userNameMatches = import_crypto.default.timingSafeEqual(Buffer.from(user.username), Buffer.from(username));
         const passwordMatches = import_crypto.default.timingSafeEqual(Buffer.from(user.password), Buffer.from(password));
         if (userNameMatches && passwordMatches) {

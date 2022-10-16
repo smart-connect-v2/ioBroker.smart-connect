@@ -40,9 +40,7 @@ class SmartConnect extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   async _getDevices() {
-    const objects = Object.values(
-      await this.getForeignObjectsAsync("*")
-    );
+    const objects = Object.values(await this.getForeignObjectsAsync(this.rootPath ? `*` : "*", "channel"));
     return objects.filter(({ type, common: { role } }) => type === "channel" && role && (0, import_device.isSupportedDeviceType)(role)).map(({ _id, common, enums = {} }) => {
       var _a;
       const roomName = (_a = Object.entries(enums).find(([enumId]) => enumId.startsWith("enum.rooms."))) == null ? void 0 : _a[1];
