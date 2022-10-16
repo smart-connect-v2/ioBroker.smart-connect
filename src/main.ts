@@ -1,15 +1,16 @@
 /*
  * Created with @iobroker/create-adapter v2.3.0
  */
-
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
 
-// Load your modules here, e.g.:
-// import * as fs from "fs";
+import Device, { isSupportedDeviceType, SupportedDeviceType } from './lib/types/device';
+import Server from './server';
 
 class SmartConnect extends utils.Adapter {
+    private server = null as Server | null;
+    private rootPath = '';
+    private stateSubscriptions = new Map<string, Set<(value: any) => void>>();
+
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
@@ -17,66 +18,135 @@ class SmartConnect extends utils.Adapter {
         });
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
-        // this.on('objectChange', this.onObjectChange.bind(this));
-        // this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
+    }
+
+    private _verifyPath = (path: string): void => {
+        const isValid = path.startsWith(this.rootPath);
+        if (!isValid) {
+            throw new Error('Invalid path');
+        }
+    };
+
+    private async _getDevices(): Promise<Device[]> {
+        const objects = Object.values(
+            await this.getForeignObjectsAsync(/*this.rootPath ? `${this.rootPath}.*` : */ '*'),
+        );
+
+        return objects
+            .filter(({ type, common: { role } }) => type === 'channel' && role && isSupportedDeviceType(role))
+            .map(({ _id, common, enums = {} }) => {
+                const roomName = Object.entries(enums).find(([enumId]) => enumId.startsWith('enum.rooms.'))?.[1];
+
+                return {
+                    id: _id,
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    name: common.name as string,
+                    type: common.role as SupportedDeviceType,
+                    roomName,
+                };
+            });
+    }
+
+    private async _getState(id: string): Promise<any> {
+        this._verifyPath(id);
+
+        const state = await this.getForeignStateAsync(id);
+        if (!state) {
+            throw new Error(`State ${id} not found`);
+        }
+
+        return state.val;
+    }
+
+    private async _setState(id: string, value: any): Promise<void> {
+        this._verifyPath(id);
+
+        await this.setForeignStateAsync(id, {
+            val: value,
+        });
+    }
+
+    private async _subscribeState(id: string, callback: (value: any) => void): Promise<void> {
+        this._verifyPath(id);
+
+        let subscriptions = this.stateSubscriptions.get(id);
+        if (!subscriptions) {
+            subscriptions = new Set([callback]);
+            this.stateSubscriptions.set(id, subscriptions);
+            await this.subscribeForeignStatesAsync(id);
+        } else {
+            subscriptions.add(callback);
+        }
+    }
+
+    private async _unsubscribeState(id: string, callback: (value: any) => void): Promise<void> {
+        this._verifyPath(id);
+
+        const subscriptions = this.stateSubscriptions.get(id);
+        if (!subscriptions) {
+            throw new Error(`No subscriptions for ${id}`);
+        }
+
+        subscriptions.delete(callback);
+        if (!subscriptions.size) {
+            this.stateSubscriptions.delete(id);
+            await this.unsubscribeForeignStatesAsync(id);
+        }
     }
 
     /**
      * Is called when databases are connected and adapter received configuration.
      */
     private async onReady(): Promise<void> {
-        // Initialize your adapter here
+        const { users, ip, port, rootPath, sessionSecret, allowedOrigins } = this.config;
 
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
+        this.rootPath = rootPath;
 
-        /*
-		For every state in the system there has to be also an object of type state
-		Here a simple template for a boolean variable named "testVariable"
-		Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-		*/
-        await this.setObjectNotExistsAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
+        if (!sessionSecret) {
+            this.log.error('Session secret is not set');
+            throw new Error('Session secret is not set');
+        }
+
+        this.log.info(`Starting backend with ${users.length} users on ${ip}:${port}...`);
+        this.log.info(`Root path: ${rootPath}`);
+
+        const privateOrigins = allowedOrigins.filter((origin) => origin.private).map((origin) => origin.origin);
+        const publicOrigins = allowedOrigins.filter((origin) => !origin.private).map((origin) => origin.origin);
+
+        if (!privateOrigins.length && !publicOrigins.length) {
+            this.log.warn('No allowed origins are set');
+        } else {
+            this.log.info(
+                `Allowed origins: ${(privateOrigins.length ? privateOrigins : ['-']).join(
+                    ', ',
+                )} (private), ${(publicOrigins.length ? publicOrigins : ['-']).join(', ')} (public)`,
+            );
+        }
+        this.server = new Server(
+            users,
+            sessionSecret,
+            {
+                getDevices: this._getDevices.bind(this),
+                getState: this._getState.bind(this),
+                setState: this._setState.bind(this),
+                subscribeState: this._subscribeState.bind(this),
+                unsubscribeState: this._unsubscribeState.bind(this),
             },
-            native: {},
-        });
+            {
+                private: privateOrigins,
+                public: publicOrigins,
+            },
+        );
 
-        // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
-        // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-        // this.subscribeStates('lights.*');
-        // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-        // this.subscribeStates('*');
-
-        /*
-			setState examples
-			you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-		*/
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
-
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
-
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
-
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
-
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+        try {
+            await this.server.listen(port, ip);
+            this.log.info('Backend started');
+        } catch (e: any) {
+            this.log.error(`Could not start backend: ${e?.message || e}`);
+            throw e;
+        }
     }
 
     /**
@@ -84,32 +154,12 @@ class SmartConnect extends utils.Adapter {
      */
     private onUnload(callback: () => void): void {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
-
-            callback();
+            this.server?.close();
         } catch (e) {
+        } finally {
             callback();
         }
     }
-
-    // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-    // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-    // /**
-    //  * Is called if a subscribed object changes
-    //  */
-    // private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-    //     if (obj) {
-    //         // The object was changed
-    //         this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-    //     } else {
-    //         // The object was deleted
-    //         this.log.info(`object ${id} deleted`);
-    //     }
-    // }
 
     /**
      * Is called if a subscribed state changes
@@ -123,29 +173,10 @@ class SmartConnect extends utils.Adapter {
             this.log.info(`state ${id} deleted`);
         }
     }
-
-    // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-    // /**
-    //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-    //  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-    //  */
-    // private onMessage(obj: ioBroker.Message): void {
-    //     if (typeof obj === 'object' && obj.message) {
-    //         if (obj.command === 'send') {
-    //             // e.g. send email or pushover or whatever
-    //             this.log.info('send command');
-
-    //             // Send response in callback if required
-    //             if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-    //         }
-    //     }
-    // }
 }
 
 if (require.main !== module) {
-    // Export the constructor in compact mode
     module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new SmartConnect(options);
 } else {
-    // otherwise start the instance directly
     (() => new SmartConnect())();
 }

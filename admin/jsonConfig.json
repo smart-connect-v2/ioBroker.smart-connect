@@ -1,16 +1,102 @@
 {
     "i18n": true,
-    "type": "panel",
+    "type": "tabs",
     "items": {
-        "option1": {
-            "type": "checkbox",
-            "label": "option1",
-            "newLine": true
+        "general": {
+            "label": "General",
+            "type": "panel",
+            "items": {
+                "server-options": {
+                    "type": "panel",
+                    "label": "Server options",
+                    "items": {
+                        "ip": {
+                            "type": "ip",
+                            "listenOnAllPorts": true,
+                            "onlyIp4": true,
+                            "label": "IP Address"
+                        },
+                        "port": {
+                            "type": "number",
+                            "label": "Port",
+                            "min": 1000,
+                            "max": 65535
+                        },
+                        "sessionSecret": {
+                            "type": "text",
+                            "label": "Session secret",
+                            "help": "This is used to encrypt the session cookie. It should be a long random string."
+                        }
+                    }
+                },
+                "general-options": {
+                    "type": "panel",
+                    "label": "General options",
+                    "items": {
+                        "rootPath": {
+                            "type": "text",
+                            "label": "Root path",
+                            "help": "Set to e.g. alias.0 if your device structure is not under this instance"
+                        }
+                    }
+                }
+            }
         },
-        "option2": {
-            "type": "text",
-            "label": "option2",
-            "newLine": true
+        "users": {
+            "label": "Users",
+            "type": "panel",
+            "items": {
+                "users": {
+                    "type": "table",
+                    "items": [
+                        {
+                            "type": "text",
+                            "label": "Username",
+                            "title": "Username",
+                            "attr": "username",
+                            "sort": true
+                        },
+                        {
+                            "type": "password",
+                            "label": "Password",
+                            "title": "Password",
+                            "attr": "password"
+                        },
+                        {
+                            "type": "checkbox",
+                            "label": "",
+                            "title": "Admin",
+                            "attr": "admin",
+                            "filter": true
+                        }
+                    ]
+                }
+            }
+        },
+        "origins": {
+            "label": "Allowed Origins",
+            "type": "panel",
+            "items": {
+                "allowedOrigins": {
+                    "type": "table",
+                    "items": [
+                        {
+                            "type": "text",
+                            "label": "Origin",
+                            "title": "Origin",
+                            "attr": "origin",
+                            "sort": true
+                        },
+                        {
+                            "type": "checkbox",
+                            "label": "",
+                            "title": "Private",
+                            "attr": "private",
+                            "filter": true
+                        }
+                    ]
+                }
+            }
         }
     }
 }

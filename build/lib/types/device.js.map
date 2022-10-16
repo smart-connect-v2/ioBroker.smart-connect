@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/types/device.ts"],
+  "sourcesContent": ["const deviceTypes = [\n    'room-light',\n    'light',\n    'shutter',\n    'window-opener',\n    'plug',\n    'presence-sensor',\n    'bed-occupancy-sensor',\n    'door-sensor',\n    'entrance-door-sensor',\n    'climate-sensor',\n    'brightness-sensor',\n    'wireless-switch',\n    'valve',\n    'fan',\n    'speed-test',\n    'music-server',\n    'window-tilted-sensor',\n    'window-opened-sensor',\n    'routine',\n    'nuki-opener',\n    'switch',\n    'nuki-lock',\n    'readonly-plug',\n] as const;\n\nexport type SupportedDeviceType = typeof deviceTypes[number];\n\nexport const isSupportedDeviceType = (type: string): type is SupportedDeviceType => {\n    return deviceTypes.includes(type as SupportedDeviceType);\n};\n\ntype Device = {\n    id: string;\n    name?: string;\n    roomName?: string;\n    type: SupportedDeviceType;\n};\n\nexport default Device;\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,MAAM,cAAc;AAAA,EAChB;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AACJ;AAIO,MAAM,wBAAwB,CAAC,SAA8C;AAChF,SAAO,YAAY,SAAS,IAA2B;AAC3D;",
+  "names": []
+}

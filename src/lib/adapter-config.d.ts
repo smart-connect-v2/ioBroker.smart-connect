@@ -1,14 +1,19 @@
-// This file extends the AdapterConfig type from "@types/iobroker"
+import type SmartConnectUser from './types/smart-connect-user';
 
-// Augment the globally declared type ioBroker.AdapterConfig
 declare global {
     namespace ioBroker {
         interface AdapterConfig {
-            option1: boolean;
-            option2: string;
+            users: SmartConnectUser[];
+            ip: string;
+            port: number;
+            rootPath: string;
+            sessionSecret: string;
+            allowedOrigins: {
+                origin: string;
+                private: boolean;
+            }[];
         }
     }
 }
 
-// this is required so the above AdapterConfig is found by TypeScript / type checking
 export {};

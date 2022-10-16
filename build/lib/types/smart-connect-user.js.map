@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/types/smart-connect-user.ts"],
+  "sourcesContent": ["type SmartConnectUser = {\n    username: string;\n    password: string;\n    admin: boolean;\n};\nexport default SmartConnectUser;\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

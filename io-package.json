@@ -68,11 +68,16 @@
             {
                 "admin": ">=5.1.13"
             }
-        ]
+        ],
+        "messagebox": true
     },
     "native": {
-        "option1": true,
-        "option2": "42"
+        "ip": "0.0.0.0",
+        "port": 8090,
+        "users": [],
+        "rootPath": "alias.0",
+        "sessionSecret": "",
+        "allowedOrigins": []
     },
     "objects": [],
     "instanceObjects": []
