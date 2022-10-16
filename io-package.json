@@ -1,84 +1,104 @@
 {
-    "common": {
-        "name": "smart-connect",
-        "version": "0.0.1",
-        "news": {
-            "0.0.1": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "zh-cn": "首次出版"
-            }
-        },
-        "title": "Smart Connect",
-        "titleLang": {
-            "en": "Smart Connect",
-            "de": "Intelligente Verbindung",
-            "ru": "Умное подключение",
-            "pt": "Smart Connect",
-            "nl": "Slimme verbinding",
-            "fr": "Connexion intelligente",
-            "it": "Connessione intelligente",
-            "es": "Conexión inteligente",
-            "pl": "Inteligentne połączenie",
-            "zh-cn": "智能连接"
-        },
-        "desc": {
-            "en": "Backend for Smart Connect PWA",
-            "de": "Backend für Smart Connect PWA",
-            "ru": "Серверная часть для Smart Connect PWA",
-            "pt": "Back-end para Smart Connect PWA",
-            "nl": "Backend voor Smart Connect PWA",
-            "fr": "Backend pour Smart Connect PWA",
-            "it": "Backend per Smart Connect PWA",
-            "es": "Backend para Smart Connect PWA",
-            "pl": "Backend dla Smart Connect PWA",
-            "zh-cn": "Smart Connect PWA 的后端"
-        },
-        "authors": ["Simon Steindl <kosimst@gmail.com>"],
-        "keywords": ["ioBroker", "template", "Smart Home", "home automation"],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "build/main.js",
-        "icon": "smart-connect.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/smart-connect-v2/ioBroker.smart-connect/master/admin/smart-connect.png",
-        "readme": "https://github.com/smart-connect-v2/ioBroker.smart-connect/blob/master/README.md",
-        "loglevel": "info",
-        "mode": "daemon",
-        "type": "iot-systems",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=3.3.22"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=5.1.13"
-            }
-        ],
-        "messagebox": true
+  "common": {
+    "name": "smart-connect",
+    "version": "0.0.2",
+    "news": {
+      "0.0.2": {
+        "en": "initial release",
+        "de": "erstausstrahlung",
+        "ru": "начальный выпуск",
+        "pt": "lançamento inicial",
+        "nl": "niet",
+        "fr": "initial release",
+        "it": "rilascio iniziale",
+        "es": "liberación inicial",
+        "pl": "pierwsze wydanie",
+        "uk": "початковий реліз",
+        "zh-cn": "初步释放"
+      },
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
     },
-    "native": {
-        "ip": "0.0.0.0",
-        "port": 8090,
-        "users": [],
-        "rootPath": "alias.0",
-        "sessionSecret": "",
-        "allowedOrigins": []
+    "title": "Smart Connect",
+    "titleLang": {
+      "en": "Smart Connect",
+      "de": "Intelligente Verbindung",
+      "ru": "Умное подключение",
+      "pt": "Smart Connect",
+      "nl": "Slimme verbinding",
+      "fr": "Connexion intelligente",
+      "it": "Connessione intelligente",
+      "es": "Conexión inteligente",
+      "pl": "Inteligentne połączenie",
+      "zh-cn": "智能连接"
     },
-    "objects": [],
-    "instanceObjects": []
+    "desc": {
+      "en": "Backend for Smart Connect PWA",
+      "de": "Backend für Smart Connect PWA",
+      "ru": "Серверная часть для Smart Connect PWA",
+      "pt": "Back-end para Smart Connect PWA",
+      "nl": "Backend voor Smart Connect PWA",
+      "fr": "Backend pour Smart Connect PWA",
+      "it": "Backend per Smart Connect PWA",
+      "es": "Backend para Smart Connect PWA",
+      "pl": "Backend dla Smart Connect PWA",
+      "zh-cn": "Smart Connect PWA 的后端"
+    },
+    "authors": [
+      "Simon Steindl <kosimst@gmail.com>"
+    ],
+    "keywords": [
+      "ioBroker",
+      "template",
+      "Smart Home",
+      "home automation"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "icon": "smart-connect.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/smart-connect-v2/ioBroker.smart-connect/master/admin/smart-connect.png",
+    "readme": "https://github.com/smart-connect-v2/ioBroker.smart-connect/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "iot-systems",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.1.13"
+      }
+    ],
+    "messagebox": true
+  },
+  "native": {
+    "ip": "0.0.0.0",
+    "port": 8090,
+    "users": [],
+    "rootPath": "alias.0",
+    "sessionSecret": "",
+    "allowedOrigins": []
+  },
+  "objects": [],
+  "instanceObjects": []
 }
