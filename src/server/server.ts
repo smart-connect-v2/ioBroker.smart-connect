@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import { body, query, validationResult } from 'express-validator';
@@ -41,6 +41,11 @@ class Server {
     ) {
         this.users = users;
         this.sessionSecret = sessionSecret;
+
+        this.app.use(((err, req, res, _next) => {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        }) as ErrorRequestHandler);
 
         this.app.use((req, res, next) => {
             const origin = req.headers.origin;
@@ -91,11 +96,15 @@ class Server {
             });
         });
 
-        this.app.post('/login', (req, res) => {
+        this.app.post('/login', body('username').isString(), body('password').isString(), (req, res) => {
             const { username, password } = req.body;
 
             let validUser = null as SmartConnectUser | null;
             for (const user of this.users) {
+                if (user.username.length !== username.length || user.password.length !== password.length) {
+                    continue;
+                }
+
                 const userNameMatches = crypto.timingSafeEqual(Buffer.from(user.username), Buffer.from(username));
                 const passwordMatches = crypto.timingSafeEqual(Buffer.from(user.password), Buffer.from(password));
 
